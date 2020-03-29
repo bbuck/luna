@@ -9,12 +9,12 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 
-	. "github.com/bbuck/luna"
+	"github.com/bbuck/luna"
 )
 
 var _ = Describe("LuaValue", func() {
 	var (
-		engine *Engine
+		engine *luna.Engine
 		str    = "testing"
 		i      = int(10)
 		i64    = int64(100)
@@ -24,12 +24,9 @@ var _ = Describe("LuaValue", func() {
 			return a + b
 		}
 	)
-	value := func(iface interface{}) *Value {
-		return engine.ValueFor(iface)
-	}
 
 	BeforeEach(func() {
-		engine = NewEngine()
+		engine = luna.NewEngine()
 	})
 
 	AfterEach(func() {
@@ -37,7 +34,7 @@ var _ = Describe("LuaValue", func() {
 	})
 
 	It("conforms to fmt.Stringer", func() {
-		var iface interface{} = value(str)
+		var iface interface{} = engine.ValueFor(str)
 		str, ok := iface.(fmt.Stringer)
 		Ω(ok).Should(BeTrue())
 		Ω(len(str.String())).Should(BeNumerically(">", 0))
@@ -45,7 +42,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("AsString()",
 		func(val interface{}, expected string) {
-			Ω(value(val).AsString()).Should(Equal(expected))
+			Ω(engine.ValueFor(val).AsString()).Should(Equal(expected))
 		},
 		Entry("handles strings", str, str),
 		Entry("handles ints", i, "10"),
@@ -55,7 +52,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("AsFloat()",
 		func(val interface{}, expected float64) {
-			Ω(value(val).AsFloat()).Should(Equal(expected))
+			Ω(engine.ValueFor(val).AsFloat()).Should(Equal(expected))
 		},
 		Entry("handles int values", i, float64(i)),
 		Entry("handles int64 values", i64, float64(i64)),
@@ -64,14 +61,14 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("AsNumber()",
 		func(val interface{}, expected interface{}) {
-			Ω(value(val).AsNumber()).Should(Equal(value(expected).AsFloat()))
+			Ω(engine.ValueFor(val).AsNumber()).Should(Equal(engine.ValueFor(expected).AsFloat()))
 		},
 		Entry("behaves just like AsFloat()", i, i),
 	)
 
 	DescribeTable("AsBool()",
 		func(val interface{}, expected bool) {
-			Ω(value(val).AsBool()).Should(Equal(expected))
+			Ω(engine.ValueFor(val).AsBool()).Should(Equal(expected))
 		},
 		Entry("handles bool values", b, true),
 		Entry("converts strings to bools", str, true),
@@ -80,7 +77,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("IsTrue()",
 		func(val interface{}, expected bool) {
-			Ω(value(val).IsTrue()).Should(Equal(expected))
+			Ω(engine.ValueFor(val).IsTrue()).Should(Equal(expected))
 		},
 		Entry("handles true", true, true),
 		Entry("handles false", false, false),
@@ -92,7 +89,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("IsFalse()",
 		func(val interface{}, expected bool) {
-			Ω(value(val).IsFalse()).Should(Equal(expected))
+			Ω(engine.ValueFor(val).IsFalse()).Should(Equal(expected))
 		},
 		Entry("handles true", true, false),
 		Entry("handles false", false, true),
@@ -104,7 +101,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("IsNil()",
 		func(val interface{}, expected bool) {
-			Ω(value(val).IsNil()).Should(Equal(expected))
+			Ω(engine.ValueFor(val).IsNil()).Should(Equal(expected))
 		},
 		Entry("does not think strings are nil", str, false),
 		Entry("does not think ints are nil", i, false),
@@ -115,7 +112,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("IsNumber()",
 		func(v interface{}, expected bool) {
-			Ω(value(v).IsNumber()).Should(Equal(expected))
+			Ω(engine.ValueFor(v).IsNumber()).Should(Equal(expected))
 		},
 		Entry("does not think strings are numbers", str, false),
 		Entry("thinks ints are numbers", i, true),
@@ -126,7 +123,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("IsBool()",
 		func(v interface{}, expected bool) {
-			Ω(value(v).IsBool()).Should(Equal(expected))
+			Ω(engine.ValueFor(v).IsBool()).Should(Equal(expected))
 		},
 		Entry("thinks true is a bool", true, true),
 		Entry("thinks false is a bool", false, true),
@@ -137,7 +134,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("IsFunction()",
 		func(v interface{}, expected bool) {
-			Ω(value(v).IsFunction()).Should(Equal(expected))
+			Ω(engine.ValueFor(v).IsFunction()).Should(Equal(expected))
 		},
 		Entry("thinks functions are functions", fn, true),
 		Entry("does not think strings are functions", str, false),
@@ -147,7 +144,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("IsString()",
 		func(v interface{}, expected bool) {
-			Ω(value(v).IsString()).Should(Equal(expected))
+			Ω(engine.ValueFor(v).IsString()).Should(Equal(expected))
 		},
 		Entry("thinks a string is a string", str, true),
 		Entry("does not think a number is a string", i, false),
@@ -158,7 +155,7 @@ var _ = Describe("LuaValue", func() {
 
 	DescribeTable("Equals()",
 		func(a, b interface{}, expected bool) {
-			Ω(value(a).Equals(b)).Should(Equal(expected))
+			Ω(engine.ValueFor(a).Equals(b)).Should(Equal(expected))
 		},
 		Entry("nil equals nil", nil, nil, true),
 		Entry("1 equals 1", 1, 1, true),
@@ -168,17 +165,12 @@ var _ = Describe("LuaValue", func() {
 
 	Context("with a table defined in Lua", func() {
 		var (
-			tbl *Value
+			tbl *luna.Value
 			err error
-			eng *Engine
+			eng *luna.Engine
 		)
 
-		// redefine in this scope
-		value := func(i interface{}) *Value {
-			return eng.ValueFor(i)
-		}
-
-		eng = NewEngine()
+		eng = luna.NewEngine()
 		err = eng.DoString(`
 			tbl = {
 				identity = function(x)
@@ -211,7 +203,7 @@ var _ = Describe("LuaValue", func() {
 
 				Ω(err).ShouldNot(HaveOccurred())
 				Ω(vals).Should(HaveLen(1))
-				Ω(vals[0].Equals(value(expected))).Should(BeTrue())
+				Ω(vals[0].Equals(eng.ValueFor(expected))).Should(BeTrue())
 			},
 			Entry("identity returns the first argument", "identity", []interface{}{1}, 1),
 			Entry("add adds numbers", "add", []interface{}{1, 2}, 3),
@@ -220,7 +212,7 @@ var _ = Describe("LuaValue", func() {
 	})
 
 	Context("with a table as a list", func() {
-		var list *Value
+		var list *luna.Value
 
 		BeforeEach(func() {
 			list = engine.NewTable()
@@ -247,7 +239,7 @@ var _ = Describe("LuaValue", func() {
 
 		Context("when calling functions on the list", func() {
 			var (
-				results []*Value
+				results []*luna.Value
 				err     error
 			)
 
@@ -276,7 +268,7 @@ var _ = Describe("LuaValue", func() {
 			)
 
 			BeforeEach(func() {
-				list.ForEach(func(key, val *Value) {
+				list.ForEach(func(key, val *luna.Value) {
 					i := int(key.AsNumber())
 					switch i {
 					case 1:
@@ -325,7 +317,7 @@ var _ = Describe("LuaValue", func() {
 
 	Describe("AsMapStringInterface()", func() {
 		var (
-			table *Value
+			table *luna.Value
 			m     map[string]interface{}
 		)
 
@@ -355,7 +347,7 @@ var _ = Describe("LuaValue", func() {
 
 	Describe("AsSliceInterface()", func() {
 		var (
-			table *Value
+			table *luna.Value
 			s     []interface{}
 		)
 
