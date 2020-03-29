@@ -1,5 +1,11 @@
 # Luna - Wrapping the Moon
 
+More README coming soon, this project is being extracted from `dragon-mud` with
+some syntax improvements/cleanup and comment improvements.
+
+Becuase of that, still very much a WIP, the API will change between versions. And
+this README will grow to accomodate.
+
 ## Special Thanks
 
 Luna is built on top of the very excellent [gopher-lua](https://github.com/yuin/gopher-lua)
