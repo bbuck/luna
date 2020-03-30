@@ -41,3 +41,33 @@ type EngineOptions struct {
 	// be converted when being passed to Lua.
 	MethodCasing NamingConvention
 }
+
+// return the associated field transformer function depending on the casing value.
+// The only special case is SnakeCaseAndPascalCase is the default behavior of
+// gopher-luar and so we return `nil` to leverage that default behavior.
+func (n NamingConvention) getFieldTransformer() FieldTransformer {
+	switch n {
+	case SnakeCase:
+		return fieldToSnake
+	case PascalCase:
+		return fieldToPascal
+	case CamelCase:
+		return fieldToCamel
+	default:
+		return nil
+	}
+}
+
+// similar to field transformer, but returns the method name transformer function
+func (n NamingConvention) getMethodTransformer() MethodTransformer {
+	switch n {
+	case SnakeCase:
+		return methodToSnake
+	case PascalCase:
+		return methodToPascal
+	case CamelCase:
+		return methodToCamel
+	default:
+		return nil
+	}
+}

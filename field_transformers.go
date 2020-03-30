@@ -8,14 +8,34 @@ import (
 	"github.com/bbuck/luna/transformers"
 )
 
-func toSnake(t reflect.Type, s reflect.StructField) []string {
+// FieldTransformer is a function that takes information about a struct field and
+// returns an array of names to use for this field in Lua.
+type FieldTransformer func(reflect.Type, reflect.StructField) []string
+
+func fieldToSnake(t reflect.Type, s reflect.StructField) []string {
 	return []string{transformers.StringToSnake(s.Name)}
 }
 
-func toPascal(t reflect.Type, s reflect.StructField) []string {
+func fieldToPascal(t reflect.Type, s reflect.StructField) []string {
 	return []string{s.Name}
 }
 
-func toCamel(t reflect.Type, s reflect.StructField) []string {
+func fieldToCamel(t reflect.Type, s reflect.StructField) []string {
+	return []string{transformers.StringToCamel(s.Name)}
+}
+
+// MethodTransformer is a function that takes information about a struct method
+// and returns an array of names to use for this method in Lua.
+type MethodTransformer func(reflect.Type, reflect.Method) []string
+
+func methodToSnake(t reflect.Type, s reflect.Method) []string {
+	return []string{transformers.StringToSnake(s.Name)}
+}
+
+func methodToPascal(t reflect.Type, s reflect.Method) []string {
+	return []string{s.Name}
+}
+
+func methodToCamel(t reflect.Type, s reflect.Method) []string {
 	return []string{transformers.StringToCamel(s.Name)}
 }

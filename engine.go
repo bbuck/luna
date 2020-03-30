@@ -57,53 +57,13 @@ func NewEngineWithOptions(options EngineOptions) *Engine {
 
 // perform configuartion work on the engine
 func (e *Engine) configureFromOptions() {
-	// openedLibs := false
+	config := gluar.GetConfig(e.state)
+	config.FieldNames = e.Options.FieldCasing.getFieldTransformer()
+	config.MethodNames = e.Options.MethodCasing.getMethodTransformer()
 
-	// config := gluar.GetConfig(e.state)
-	// switch e.Options.FieldNaming {
-	// case SnakeCaseExportedNames:
-	// 	config.FieldNames = nil
-	// case SnakeCaseNames:
-	// 	config.FieldNames = func(t reflect.Type, s reflect.StructField) []string {
-	// 		return []string{toSnake(s.Name)}
-	// 	}
-	// case ExportedNames:
-	// 	config.FieldNames = func(t reflect.Type, s reflect.StructField) []string {
-	// 		return []string{s.Name}
-	// 	}
-	// }
-
-	// for _, opt := range opts {
-	// 	if !openedLibs && opt.OpenLibs {
-	// 		e.OpenLibs()
-	// 	}
-
-	// 	switch opt.FieldNaming {
-	// 	case SnakeCaseExportedNames:
-	// 		config.FieldNames = nil
-	// 	case SnakeCaseNames:
-	// 		config.FieldNames = func(t reflect.Type, s reflect.StructField) []string {
-	// 			return []string{toSnake(s.Name)}
-	// 		}
-	// 	case ExportedNames:
-	// 		config.FieldNames = func(t reflect.Type, s reflect.StructField) []string {
-	// 			return []string{s.Name}
-	// 		}
-	// 	}
-
-	// 	switch opt.MethodNaming {
-	// 	case SnakeCaseExportedNames:
-	// 		config.MethodNames = nil
-	// 	case SnakeCaseNames:
-	// 		config.MethodNames = func(t reflect.Type, s reflect.Method) []string {
-	// 			return []string{toSnake(s.Name)}
-	// 		}
-	// 	case ExportedNames:
-	// 		config.MethodNames = func(t reflect.Type, s reflect.Method) []string {
-	// 			return []string{s.Name}
-	// 		}
-	// 	}
-	// }
+	if engine.Options.OpenLibs {
+		e.OpenLibs()
+	}
 }
 
 // Close will perform a close on the Lua state.
